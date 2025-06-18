@@ -1,23 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>LogicNifty</title>
+  <title>LogicNifty Signal Status</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <style>
+    body { font-family: Arial; text-align: center; margin-top: 50px; }
+    .buy { color: green; }
+    .sell { color: red; }
+  </style>
 </head>
-<body style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+<body>
 
-  <h1>📈 Welcome to LogicNifty</h1>
-  <p>This is your first test website using GitHub Pages!</p>
+  <h1>🚀 LogicNifty Signal Status</h1>
+  <h2 id="signal">Loading...</h2>
+  <p><strong>Group Count:</strong> <span id="groupcount">-</span></p>
+  <p><strong>Time:</strong> <span id="time">-</span></p>
 
-  <h2>🚀 Signal Status</h2>
-  <p style="font-size: 24px; color: green;">🔔 BUY Signal Active</p>
-  
-  <p>Last Updated: <strong>9:35 AM</strong></p>
+  <script>
+    // Firebase config
+    var firebaseConfig = {
+      databaseURL: "https://logicnifty-default-rtdb.firebaseio.com/"
+    };
+    firebase.initializeApp(firebaseConfig);
 
-  <hr style="margin: 40px 0;" />
+    var dbRef = firebase.database().ref("signals");
 
-  
+    dbRef.on("value", function(snapshot) {
+      var data = snapshot.val();
+      document.getElementById("signal").innerText = data.signal + " Signal Active";
+      document.getElementById("signal").className = data.signal === "BUY" ? "buy" : "sell";
+      document.getElementById("groupcount").innerText = data.groupcount;
+      document.getElementById("time").innerText = data.time;
+    });
+  </script>
+
 </body>
 </html>
 
