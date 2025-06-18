@@ -8,7 +8,7 @@
       background: #eef2f3;
       padding: 20px;
     }
-    h1 {
+    h1, h2 {
       text-align: center;
     }
     table {
@@ -44,6 +44,8 @@
 <body>
 
   <h1>📜 Signal History - LogicNifty</h1>
+  <h2 id="liveSignal">🔄 Loading live signal...</h2>
+
   <table id="historyTable">
     <thead>
       <tr>
@@ -53,43 +55,56 @@
       </tr>
     </thead>
     <tbody>
-      <tr><td colspan="3">Loading...</td></tr>
+      <tr><td colspan="3">Loading history...</td></tr>
     </tbody>
   </table>
 
   <a href="index.html">⬅️ Back to Live Signal</a>
 
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
+
   <script>
-    fetch("https://logicnifty-default-rtdb.firebaseio.com/signals.json")
-      .then(res => res.json())
-      .then(data => {
-        const tbody = document.querySelector("#historyTable tbody");
-        tbody.innerHTML = "";
+    // Firebase Config
+    const firebaseConfig = {
+      databaseURL: "https://logicnifty-default-rtdb.firebaseio.com/"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-        Object.keys(data).forEach(dateKey => {
-          if (dateKey !== "today") {
-            const daySignals = data[dateKey];
-            Object.values(daySignals).forEach(signalEntry => {
-              const row = document.createElement("tr");
-              row.innerHTML = `
-                <td>${dateKey}</td>
-                <td>${signalEntry.time}</td>
-                <td class="${signalEntry.signal === 'BUY' ? 'buy' : 'sell'}">
-                  ${signalEntry.signal}
-                </td>
-              `;
-              tbody.appendChild(row);
-            });
-          }
-        });
-      })
-      .catch(err => {
-        const tbody = document.querySelector("#historyTable tbody");
-        tbody.innerHTML = `<tr><td colspan="3">Error loading data</td></tr>`;
-        console.error(err);
-      });
+    // LIVE signal
+    const liveRef = db.ref('signals');
+    liveRef.on('value', snapshot => {
+      const live = snapshot.val();
+      if (live) {
+        document.getElementById("liveSignal").innerText = `📢 LIVE: ${live.signal} at ${live.time}`;
+      }
+    });
+
+    // HISTORY
+    const historyRef = db.ref('history');
+    historyRef.once('value').then(snapshot => {
+      const data = snapshot.val();
+      const tbody = document.querySelector("#historyTable tbody");
+      tbody.innerHTML = "";
+
+      for (const date in data) {
+        for (const time in data[date]) {
+          const signalData = data[date][time];
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${date}</td>
+            <td>${time}</td>
+            <td class="${signalData.signal === 'BUY' ? 'buy' : 'sell'}">${signalData.signal}</td>
+          `;
+          tbody.appendChild(row);
+        }
+      }
+    }).catch(err => {
+      document.querySelector("#historyTable tbody").innerHTML = `<tr><td colspan="3">Error loading history</td></tr>`;
+      console.error(err);
+    });
   </script>
-
 </body>
 </html>
-
