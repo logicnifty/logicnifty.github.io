@@ -1,46 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>LogicNifty Signal</title>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>LogicNifty Signal</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      text-align: center;
-      padding: 40px;
+      background: #f2f4f8;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
     }
     .card {
       background: #ffffff;
       padding: 30px;
       border-radius: 20px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      text-align: center;
       max-width: 400px;
-      margin: auto;
+      width: 90%;
     }
     .signal {
-      font-size: 40px;
+      font-size: 48px;
       font-weight: bold;
-      margin-bottom: 10px;
-      color: #222;
+      margin-bottom: 20px;
+    }
+    .signal.buy {
+      color: #27ae60;
+    }
+    .signal.sell {
+      color: #e74c3c;
     }
     .time {
       font-size: 18px;
       color: #555;
     }
-    .updated {
-      font-size: 12px;
-      color: #999;
-      margin-top: 10px;
+    .refresh-info {
+      margin-top: 15px;
+      font-size: 13px;
+      color: #888;
     }
   </style>
 </head>
 <body>
-
   <div class="card">
-    <div class="signal" id="signal">Loading...</div>
-    <div class="time" id="time">Please wait...</div>
-    <div class="updated" id="updated-time"></div>
+    <div id="signal" class="signal">Loading...</div>
+    <div id="time" class="time">Please wait...</div>
+    <div id="refresh" class="refresh-info"></div>
   </div>
 
   <script>
@@ -48,26 +58,27 @@
       fetch('https://logicnifty-default-rtdb.firebaseio.com/signals.json')
         .then(response => response.json())
         .then(data => {
-          document.getElementById('signal').textContent = "📢 SIGNAL: " + data.signal;
-          document.getElementById('time').textContent = "🕒 Updated at: " + data.time;
+          const signalEl = document.getElementById('signal');
+          const timeEl = document.getElementById('time');
+          const refreshEl = document.getElementById('refresh');
+
+          signalEl.textContent = data.signal.toUpperCase() === "BUY" ? "🟢 BUY" : "🔴 SELL";
+          signalEl.className = `signal ${data.signal.toLowerCase()}`;
+          timeEl.textContent = "🕒 " + data.time;
 
           const now = new Date();
-          const updated = now.toLocaleTimeString();
-          document.getElementById('updated-time').textContent = "🔄 Auto-refreshed: " + updated;
+          refreshEl.textContent = "🔄 Auto-refreshed: " + now.toLocaleTimeString();
         })
         .catch(error => {
-          document.getElementById('signal').textContent = "Error!";
-          document.getElementById('time').textContent = "Could not load data.";
-          console.error("Fetch error:", error);
+          document.getElementById('signal').textContent = "Error loading!";
+          document.getElementById('time').textContent = "";
+          document.getElementById('refresh').textContent = "";
+          console.error("Fetch failed:", error);
         });
     }
 
-    // Initial call
-    fetchSignal();
-
-    // Refresh every 60 seconds
-    setInterval(fetchSignal, 60000);
+    fetchSignal(); // First call
+    setInterval(fetchSignal, 60000); // Refresh every 60s
   </script>
-
 </body>
 </html>
