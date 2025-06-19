@@ -35,7 +35,7 @@
     .signal.sell {
       color: #e74c3c;
     }
-    .time {
+    .time, .date, .local-time {
       font-size: 18px;
       color: #555;
     }
@@ -49,7 +49,9 @@
 <body>
   <div class="card">
     <div id="signal" class="signal">Loading...</div>
-    <div id="time" class="time">Please wait...</div>
+    <div id="date" class="date"></div>
+    <div id="time" class="time"></div>
+    <div id="local-time" class="local-time"></div>
     <div id="refresh" class="refresh-info"></div>
   </div>
 
@@ -60,25 +62,41 @@
         .then(data => {
           const signalEl = document.getElementById('signal');
           const timeEl = document.getElementById('time');
+          const localTimeEl = document.getElementById('local-time');
+          const dateEl = document.getElementById('date');
           const refreshEl = document.getElementById('refresh');
 
+          // Signal color
           signalEl.textContent = data.signal.toUpperCase() === "BUY" ? "🟢 BUY" : "🔴 SELL";
           signalEl.className = `signal ${data.signal.toLowerCase()}`;
-          timeEl.textContent = "🕒 " + data.time;
 
+          // Firebase time
+          timeEl.textContent = "🕒Signal Time: " + data.time;
+
+          // Current system time
           const now = new Date();
-          refreshEl.textContent = "🔄 Auto-refreshed: " + now.toLocaleTimeString();
+          const currentTime = now.toLocaleTimeString();
+          localTimeEl.textContent = "🕑 Current Time: " + currentTime;
+
+          // Date
+          const formattedDate = now.toISOString().slice(0, 10);
+          dateEl.textContent = "📅 Date: " + formattedDate;
+
+          // Refresh time
+          refreshEl.textContent = "🔄 Auto-refreshed at: " + currentTime;
         })
         .catch(error => {
           document.getElementById('signal').textContent = "Error loading!";
           document.getElementById('time').textContent = "";
+          document.getElementById('local-time').textContent = "";
+          document.getElementById('date').textContent = "";
           document.getElementById('refresh').textContent = "";
           console.error("Fetch failed:", error);
         });
     }
 
-    fetchSignal(); // First call
-    setInterval(fetchSignal, 60000); // Refresh every 60s
+    fetchSignal(); // Initial load
+    setInterval(fetchSignal, 60000); // Auto refresh every 60s
   </script>
 </body>
 </html>
