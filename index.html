@@ -6,14 +6,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LogicNifty Signals</title>
   <style>
- body {
+body {
   font-family: 'Segoe UI', sans-serif;
   background-color: #111;
   color: #fff;
   margin: 0;
   padding: 16px;
-  transition: background 0.3s, color 0.3s;
+  width: 100%;
+  max-width: none; /* ✅ Ensure no fixed width */
+  box-sizing: border-box;
 }
+
     .signal-box {
       border-radius: 8px;
       padding: 14px;
