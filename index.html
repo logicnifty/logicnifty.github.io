@@ -2,146 +2,186 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LogicNifty Live Signals</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       background-color: #111;
       color: #fff;
+      max-width: 480px;
+      margin: auto;
+      padding: 16px;
+      transition: background 0.3s, color 0.3s;
+    }
+    .signal-box {
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 14px;
       text-align: center;
-      margin: 0;
-      padding: 20px;
-    }
-
-    h1 {
-      font-size: 24px;
-    }
-
-    .timestamp {
-      font-size: 14px;
-      margin-top: -10px;
-      margin-bottom: 20px;
-      color: #ccc;
-    }
-
-    .signal-boxes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
-  max-width: 600px;
-  margin: auto;
-  padding: 0 10px;
-}
-
-    .box {
-      width: 180px;
-      height: 120px;
-      border-radius: 12px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      font-size: 16px;
-      font-weight: bold;
+      font-size: 18px;
       color: #fff;
+      transition: background 0.3s, border 0.3s;
+    }
+    .bull-rev { background-color: #1e3a1e; border: 2px solid #4caf50; }
+    .bear-rev { background-color: #3a1e1e; border: 2px solid #f44336; }
+    .bull-break { background-color: #00333a; border: 2px solid #00bcd4; }
+    .bear-break { background-color: #2a1e3a; border: 2px solid #9c27b0; }
+    .timestamp { font-size: 14px; color: #ccc; }
+
+    .history-button {
+      background: #444;
+      color: #fff;
+      padding: 10px 18px;
+      border-radius: 6px;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 15px;
     }
 
-    .green { background-color: #28a745; }
-    .red { background-color: #dc3545; }
-    .blue { background-color: #007bff; }
-    .orange { background-color: #fd7e14; }
-    .gray { background-color: #6c757d; }
-
-    .label {
-      font-size: 14px;
+    .theme-toggle {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
       margin-bottom: 10px;
     }
 
-    .signal-time {
-      font-size: 18px;
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+      margin-left: 10px;
     }
 
-    .footer {
-      margin-top: 40px;
-      font-size: 12px;
-      color: #666;
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
     }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .light-mode {
+      background-color: #fff !important;
+      color: #000 !important;
+    }
+
+    .light-mode .signal-box { color: #000; }
+    .light-mode .bull-rev { background-color: #e8f5e9; border-color: #4caf50; }
+    .light-mode .bear-rev { background-color: #ffebee; border-color: #f44336; }
+    .light-mode .bull-break { background-color: #e0f7fa; border-color: #00bcd4; }
+    .light-mode .bear-break { background-color: #f3e5f5; border-color: #9c27b0; }
   </style>
 </head>
 <body>
-  <h1>📊 LogicNifty LIVE Signals</h1>
-  <div class="timestamp" id="last-update">Last updated: --</div>
+<div class="theme-toggle">
+  <label>🌙/☀️</label>
+  <label class="switch">
+    <input type="checkbox" onclick="toggleMode()">
+    <span class="slider"></span>
+  </label>
+</div>
 
-  <div class="signal-boxes">
-    <div class="box green" id="bottom_finder">
-      <div class="label">Bottom Finder</div>
-      <div class="signal-time" id="bottom_finder_time">Waiting for signal</div>
-    </div>
+<h2 style="text-align:center;">LIVE Nifty Signals</h2>
+<div id="bottom_finder" class="signal-box bull-break">
+  Bottom Finder<br><span class="timestamp" id="bottom_finder_time">Waiting for signal</span>
+</div>
+<div id="top_finder" class="signal-box bear-break">
+  Top Finder<br><span class="timestamp" id="top_finder_time">Waiting for signal</span>
+</div>
+<div id="reversal_bull" class="signal-box bull-rev">
+  Reversal Bull<br><span class="timestamp" id="reversal_bull_time">Waiting for signal</span>
+</div>
+<div id="reversal_bear" class="signal-box bear-rev">
+  Reversal Bear<br><span class="timestamp" id="reversal_bear_time">Waiting for signal</span>
+</div>
 
-    <div class="box red" id="top_finder">
-      <div class="label">Top Finder</div>
-      <div class="signal-time" id="top_finder_time">Waiting for signal</div>
-    </div>
+<a class="history-button" href="history.html">View Signal History</a>
 
-    <div class="box blue" id="reversal_bull">
-      <div class="label">Reversal Bull</div>
-      <div class="signal-time" id="reversal_bull_time">Waiting for signal</div>
-    </div>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCjL2T_j_tnV22YuftQ444inUTd0FoDC7Q",
+    authDomain: "logicnifty-live.firebaseapp.com",
+    databaseURL: "https://logicnifty-live-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "logicnifty-live",
+    storageBucket: "logicnifty-live.appspot.com",
+    messagingSenderId: "812760222301",
+    appId: "1:812760222301:web:61d73f8e9a37259abf5bb4"
+  };
 
-    <div class="box orange" id="reversal_bear">
-      <div class="label">Reversal Bear</div>
-      <div class="signal-time" id="reversal_bear_time">Waiting for signal</div>
-    </div>
-  </div>
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-  <div class="footer">© 2025 LogicNifty</div>
+  const signals = ["bottom_finder", "top_finder", "reversal_bull", "reversal_bear"];
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  function updateTime(signal, timestamp) {
+    const el = document.getElementById(`${signal}_time`);
+    el.innerText = timestamp || "Waiting for signal";
+  }
 
-  <script>
-    // Your Firebase config
-    const firebaseConfig = {
-      apiKey: "AIzaSyCjL2T_j_tnV22YuftQ444inUTd0FoDC7Q",
-      authDomain: "logicnifty-live.firebaseapp.com",
-      databaseURL: "https://logicnifty-live-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "logicnifty-live",
-      storageBucket: "logicnifty-live.appspot.com",
-      messagingSenderId: "812760222301",
-      appId: "1:812760222301:web:61d73f8e9a37259abf5bb4"
-    };
+  function fetchSignals() {
+    db.ref("live_signals").once("value", snapshot => {
+      const data = snapshot.val() || {};
+      signals.forEach(signal => {
+        updateTime(signal, data[signal]?.timestamp || null);
+      });
+    });
+  }
 
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    const signals = ["bottom_finder", "top_finder", "reversal_bull", "reversal_bear"];
-
-    function updateTime(signal, timestamp) {
-      const el = document.getElementById(`${signal}_time`);
-      el.innerText = timestamp || "Waiting for signal";
-    }
-
-    function updateLastUpdatedTime() {
-      const now = new Date();
-      const formatted = now.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-      document.getElementById("last-update").innerText = "Last updated: " + formatted;
-    }
-
-    function fetchSignals() {
-      db.ref("live_signals").once("value", snapshot => {
-        const data = snapshot.val() || {};
-        signals.forEach(signal => {
-          updateTime(signal, data[signal]?.timestamp || null);
-        });
-        updateLastUpdatedTime();
+  // Reset at 8:00 AM IST
+  function resetIfMorning() {
+    const now = new Date();
+    const hrs = now.getHours();
+    const mins = now.getMinutes();
+    if (hrs === 8 && mins === 0) {
+      signals.forEach(sig => {
+        db.ref(`live_signals/${sig}/timestamp`).set(null);
       });
     }
+  }
 
-    setInterval(fetchSignals, 10000); // update every 10 seconds
-    fetchSignals(); // initial fetch
-  </script>
+  function toggleMode() {
+    document.body.classList.toggle("light-mode");
+  }
+
+  fetchSignals();
+  setInterval(fetchSignals, 10000); // every 10 seconds
+  setInterval(resetIfMorning, 60000); // check reset every minute
+</script>
 </body>
 </html>
