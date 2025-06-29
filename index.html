@@ -26,11 +26,13 @@
     }
 
     .signal-boxes {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-    }
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+  max-width: 600px;
+  margin: auto;
+  padding: 0 10px;
+}
 
     .box {
       width: 180px;
