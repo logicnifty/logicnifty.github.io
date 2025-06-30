@@ -157,7 +157,11 @@
 
   function speak(text) {
     if ('speechSynthesis' in window) {
+      const voices = speechSynthesis.getVoices();
       const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = 'en-IN';
+      if (voices.length) msg.voice = voices.find(v => v.lang === 'en-IN') || voices[0];
+      speechSynthesis.cancel(); // Stop any ongoing speech
       speechSynthesis.speak(msg);
     }
   }
@@ -168,7 +172,7 @@
 
     if (timestamp && timestamp !== previous) {
       el.innerText = timestamp;
-      speak(signal.replace(/_/g, " ")); // speak on change
+      speak(signal.replace(/_/g, " "));
     } else if (!timestamp) {
       el.innerText = "Waiting for signal";
     }
@@ -205,8 +209,8 @@
   }
 
   fetchSignals();
-  setInterval(fetchSignals, 10000); // every 10 seconds
-  setInterval(resetIfMorning, 60000); // check reset every minute
+  setInterval(fetchSignals, 10000);
+  setInterval(resetIfMorning, 60000);
 </script>
 </body>
 </html>
