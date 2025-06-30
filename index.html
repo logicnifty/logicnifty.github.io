@@ -110,9 +110,9 @@
 </head>
 <body>
 
-<!-- Unlock speech on mobile -->
-<button id="unlockAudio" onclick="unlockSpeech()" style="position:absolute; top:0; left:0; width:1px; height:1px; opacity:0;">Start</button>
 <audio id="beep" src="ding.mp3" preload="auto"></audio>
+
+<button id="enableSoundBtn" onclick="unlockSound()" style="margin: 10px auto; display: none;">🔊 Tap to Enable Sound</button>
 
 <div class="theme-toggle">
   <label>🌙/☀️</label>
@@ -158,30 +158,44 @@
 
   const signals = ["bottom_finder", "top_finder", "reversal_bull", "reversal_bear"];
   const lastTimestamps = {};
-  let speechUnlocked = false;
 
-  function unlockSpeech() {
-    if (!speechUnlocked) {
-      const dummy = new SpeechSynthesisUtterance("Voice enabled");
-      speechSynthesis.speak(dummy);
-      speechUnlocked = true;
-      document.getElementById("unlockAudio").remove();
+  let soundEnabled = false;
+
+  function speak(text) {
+    if (!soundEnabled) return;
+    try {
+      const synth = window.speechSynthesis;
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = 'en-IN';
+      synth.cancel();
+      synth.speak(msg);
+    } catch (e) {
+      console.warn("Speech error", e);
     }
   }
 
-  function speak(text) {
-    if ('speechSynthesis' in window && speechUnlocked) {
-      const voices = speechSynthesis.getVoices();
-      const msg = new SpeechSynthesisUtterance(text);
-      msg.lang = 'en-IN';
-      if (voices.length) msg.voice = voices.find(v => v.lang === 'en-IN') || voices[0];
-      speechSynthesis.cancel();
-      speechSynthesis.speak(msg);
-    }
+  function playBeep() {
+    if (!soundEnabled) return;
     const beep = document.getElementById("beep");
     if (beep) {
       beep.currentTime = 0;
-      beep.play();
+      beep.play().catch(err => console.log("Autoplay error:", err));
+    }
+  }
+
+  function unlockSound() {
+    soundEnabled = true;
+    playBeep();
+    speak("Sound enabled");
+    document.getElementById("enableSoundBtn").style.display = "none";
+  }
+
+  function detectPlatform() {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    if (!isMobile) {
+      unlockSound();
+    } else {
+      document.getElementById("enableSoundBtn").style.display = "block";
     }
   }
 
@@ -192,6 +206,7 @@
     if (timestamp && timestamp !== previous) {
       el.innerText = timestamp;
       speak(signal.replace(/_/g, " "));
+      playBeep();
     } else if (!timestamp) {
       el.innerText = "Waiting for signal";
     }
@@ -227,6 +242,7 @@
     document.body.classList.toggle("light-mode");
   }
 
+  detectPlatform();
   fetchSignals();
   setInterval(fetchSignals, 10000);
   setInterval(resetIfMorning, 60000);
