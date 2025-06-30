@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LogicNifty Live Signals</title>
   <style>
     body {
@@ -14,16 +14,18 @@
       padding: 16px;
       transition: background 0.3s, color 0.3s;
     }
+
     .signal-box {
       border-radius: 8px;
-      padding: 14px;
+      padding: 20px;
       margin-bottom: 14px;
       text-align: center;
-      font-size: 22px;
+      font-size: 18px;
       color: #fff;
       transition: background 0.3s, border 0.3s;
       height: 100px;
     }
+
     .bull-rev { background-color: #1e3a1e; border: 2px solid #4caf50; }
     .bear-rev { background-color: #3a1e1e; border: 2px solid #f44336; }
     .bull-break { background-color: #00333a; border: 2px solid #00bcd4; }
@@ -107,6 +109,7 @@
   </style>
 </head>
 <body>
+
 <div class="theme-toggle">
   <label>🌙/☀️</label>
   <label class="switch">
@@ -116,6 +119,7 @@
 </div>
 
 <h2 style="text-align:center;">LIVE Nifty Signals</h2>
+
 <div id="bottom_finder" class="signal-box bull-break">
   Bottom Finder<br><span class="timestamp" id="bottom_finder_time">Waiting for signal</span>
 </div>
@@ -130,6 +134,9 @@
 </div>
 
 <a class="history-button" href="history.html">View Signal History</a>
+
+<!-- Audio Alert -->
+<audio id="alertSound" src="ding.mp3" preload="auto"></audio>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -149,10 +156,34 @@
   const db = firebase.database();
 
   const signals = ["bottom_finder", "top_finder", "reversal_bull", "reversal_bear"];
+  const lastTimestamps = {};
+
+  function speak(text) {
+    if ('speechSynthesis' in window) {
+      const msg = new SpeechSynthesisUtterance(text);
+      speechSynthesis.speak(msg);
+    }
+  }
+
+  function playSound() {
+    const sound = document.getElementById("alertSound");
+    sound.currentTime = 0;
+    sound.play();
+  }
 
   function updateTime(signal, timestamp) {
     const el = document.getElementById(`${signal}_time`);
-    el.innerText = timestamp || "Waiting for signal";
+    const previous = lastTimestamps[signal];
+
+    if (timestamp && timestamp !== previous) {
+      el.innerText = timestamp;
+      playSound();
+      speak(signal.replace(/_/g, " "));
+    } else if (!timestamp) {
+      el.innerText = "Waiting for signal";
+    }
+
+    lastTimestamps[signal] = timestamp;
   }
 
   function fetchSignals() {
@@ -164,23 +195,21 @@
     });
   }
 
- // Reset at 9:00 AM IST
-function resetIfMorning() {
-  const now = new Date();
-  const istOffset = 5.5 * 60 * 60 * 1000; // IST = UTC + 5:30
-  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-  const istTime = new Date(utc + istOffset);
-
-  const hrs = istTime.getHours();
-  const mins = istTime.getMinutes();
-
-  if (hrs === 9 && mins === 10) {
-    signals.forEach(sig => {
-      db.ref(`live_signals/${sig}/timestamp`).set(null);
-      updateTime(sig, null); // <-- ADD THIS LINE
-    });
+  // Reset at 9:10 AM IST
+  function resetIfMorning() {
+    const now = new Date();
+    const istOffset = 5.5 * 60 * 60 * 1000;
+    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+    const istTime = new Date(utc + istOffset);
+    const hrs = istTime.getHours();
+    const mins = istTime.getMinutes();
+    if (hrs === 9 && mins === 10) {
+      signals.forEach(sig => {
+        db.ref(`live_signals/${sig}/timestamp`).set(null);
+        updateTime(sig, null);
+      });
+    }
   }
-}
 
   function toggleMode() {
     document.body.classList.toggle("light-mode");
