@@ -20,17 +20,22 @@
       padding: 20px;
       margin-bottom: 14px;
       text-align: center;
-      font-size: 18px;
+      font-size: 22px;
       color: #fff;
       transition: background 0.3s, border 0.3s;
-      height: 100px;
+      height: 120px;
     }
 
     .bull-rev { background-color: #1e3a1e; border: 2px solid #4caf50; }
     .bear-rev { background-color: #3a1e1e; border: 2px solid #f44336; }
     .bull-break { background-color: #00333a; border: 2px solid #00bcd4; }
     .bear-break { background-color: #2a1e3a; border: 2px solid #9c27b0; }
-    .timestamp { font-size: 14px; color: #ccc; }
+    .timestamp {
+      font-size: 18px;
+      color: #ffeb3b;
+      margin-top: 6px;
+      display: block;
+    }
 
     .history-button {
       background: #444;
@@ -106,29 +111,10 @@
     .light-mode .bear-rev { background-color: #ffebee; border-color: #f44336; }
     .light-mode .bull-break { background-color: #e0f7fa; border-color: #00bcd4; }
     .light-mode .bear-break { background-color: #f3e5f5; border-color: #9c27b0; }
+    .light-mode .timestamp { color: #000; }
   </style>
 </head>
 <body>
-
-<audio id="beep" src="ding.mp3" preload="auto"></audio>
-
-<button id="enableSoundBtn" onclick="unlockSound()" style="
-  display: none;
-  margin: 20px auto;
-  padding: 12px 20px;
-  font-size: 16px;
-  background: #2196f3;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-">
-  🔊 <span style="margin-left: 8px;">Tap to Enable Sound</span>
-</button>
-
 
 <div class="theme-toggle">
   <label>🌙/☀️</label>
@@ -153,9 +139,9 @@
   Reversal Bear<br><span class="timestamp" id="reversal_bear_time">Waiting for signal</span>
 </div>
 
-<a class="history-button" href="history.html">View Signal History</a>
+<a class="history-button" href="history.html">📜 View Signal History</a>
+<a class="history-button" href="index.html">🔙 Back to Home</a>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
@@ -175,58 +161,14 @@
   const signals = ["bottom_finder", "top_finder", "reversal_bull", "reversal_bear"];
   const lastTimestamps = {};
 
-  let soundEnabled = false;
-
-  function speak(text) {
-    if (!soundEnabled) return;
-    try {
-      const synth = window.speechSynthesis;
-      const msg = new SpeechSynthesisUtterance(text);
-      msg.lang = 'en-IN';
-      synth.cancel();
-      synth.speak(msg);
-    } catch (e) {
-      console.warn("Speech error", e);
-    }
-  }
-
-  function playBeep() {
-    if (!soundEnabled) return;
-    const beep = document.getElementById("beep");
-    if (beep) {
-      beep.currentTime = 0;
-      beep.play().catch(err => console.log("Autoplay error:", err));
-    }
-  }
-
-  function unlockSound() {
-    soundEnabled = true;
-    playBeep();
-    speak("Sound enabled");
-    document.getElementById("enableSoundBtn").style.display = "none";
-  }
-
-  function detectPlatform() {
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-    if (!isMobile) {
-      unlockSound();
-    } else {
-      document.getElementById("enableSoundBtn").style.display = "block";
-    }
-  }
-
   function updateTime(signal, timestamp) {
     const el = document.getElementById(`${signal}_time`);
     const previous = lastTimestamps[signal];
-
     if (timestamp && timestamp !== previous) {
       el.innerText = timestamp;
-      speak(signal.replace(/_/g, " "));
-      playBeep();
     } else if (!timestamp) {
       el.innerText = "Waiting for signal";
     }
-
     lastTimestamps[signal] = timestamp;
   }
 
@@ -258,7 +200,6 @@
     document.body.classList.toggle("light-mode");
   }
 
-  detectPlatform();
   fetchSignals();
   setInterval(fetchSignals, 10000);
   setInterval(resetIfMorning, 60000);
