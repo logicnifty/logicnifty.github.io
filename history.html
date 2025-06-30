@@ -1,109 +1,91 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>LogicNifty Signal History</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Signal History</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #eef2f3;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #111;
+      color: #fff;
       padding: 20px;
+      max-width: 600px;
+      margin: auto;
     }
-    h1, h2 {
-      text-align: center;
+    h2 { text-align: center; }
+    .signal-section {
+      margin-bottom: 30px;
     }
-    table {
-      width: 90%;
-      max-width: 800px;
-      margin: 20px auto;
-      border-collapse: collapse;
-      background: white;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    ul {
+      list-style: none;
+      padding-left: 0;
     }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ddd;
-      text-align: center;
+    li {
+      padding: 6px 0;
+      border-bottom: 1px solid #444;
     }
-    .buy {
-      color: green;
-      font-weight: bold;
-    }
-    .sell {
-      color: red;
-      font-weight: bold;
-    }
-    a {
-      display: block;
-      margin: 20px auto;
-      text-align: center;
-      text-decoration: none;
-      color: #007bff;
+    .signal-name {
+      font-size: 20px;
+      margin-bottom: 10px;
+      color: #00e676;
     }
   </style>
 </head>
 <body>
+  <h2>🔁 Signal History</h2>
 
-  <h1>📜 Signal History - LogicNifty</h1>
-  <h2 id="liveSignal">🔄 Loading live signal...</h2>
+  <div id="history"></div>
 
-  <table id="historyTable">
-    <thead>
-      <tr>
-        <th>📅 Date</th>
-        <th>🕒 Time</th>
-        <th>📊 Signal</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr><td colspan="3">Loading history...</td></tr>
-    </tbody>
-  </table>
-
-  <a href="index.html">⬅️ Back to Live Signal</a>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
-
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
   <script>
-    // Firebase Config
     const firebaseConfig = {
-      databaseURL: "https://logicnifty-default-rtdb.firebaseio.com/"
+      apiKey: "AIzaSyCjL2T_j_tnV22YuftQ444inUTd0FoDC7Q",
+      authDomain: "logicnifty-live.firebaseapp.com",
+      databaseURL: "https://logicnifty-live-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "logicnifty-live",
+      storageBucket: "logicnifty-live.appspot.com",
+      messagingSenderId: "812760222301",
+      appId: "1:812760222301:web:61d73f8e9a37259abf5bb4"
     };
+
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // LIVE signal
-    const liveRef = db.ref('signals');
-    liveRef.on('value', snapshot => {
-      const live = snapshot.val();
-      if (live) {
-        document.getElementById("liveSignal").innerText = `📢 LIVE: ${live.signal} at ${live.time}`;
-      }
-    });
+    const signalTypes = ["bottom_finder", "top_finder", "reversal_bull", "reversal_bear"];
 
-    // HISTORY
-    const historyRef = db.ref('history');
-    historyRef.once('value').then(snapshot => {
-      const data = snapshot.val();
-      const tbody = document.querySelector("#historyTable tbody");
-      tbody.innerHTML = "";
+    const historyDiv = document.getElementById("history");
 
-      for (const date in data) {
-        for (const time in data[date]) {
-          const signalData = data[date][time];
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${date}</td>
-            <td>${time}</td>
-            <td class="${signalData.signal === 'BUY' ? 'buy' : 'sell'}">${signalData.signal}</td>
-          `;
-          tbody.appendChild(row);
+    signalTypes.forEach(signal => {
+      const section = document.createElement("div");
+      section.className = "signal-section";
+
+      const heading = document.createElement("div");
+      heading.className = "signal-name";
+      heading.innerText = signal.replace("_", " ").toUpperCase();
+      section.appendChild(heading);
+
+      const ul = document.createElement("ul");
+
+      db.ref(`signal_history/${signal}`).once("value", snapshot => {
+        const data = snapshot.val();
+        if (data) {
+          const timestamps = Object.values(data).reverse();
+          timestamps.forEach(ts => {
+            const li = document.createElement("li");
+            li.innerText = ts;
+            ul.appendChild(li);
+          });
+        } else {
+          const li = document.createElement("li");
+          li.innerText = "No history yet.";
+          ul.appendChild(li);
         }
-      }
-    }).catch(err => {
-      document.querySelector("#historyTable tbody").innerHTML = `<tr><td colspan="3">Error loading history</td></tr>`;
-      console.error(err);
+      });
+
+      section.appendChild(ul);
+      historyDiv.appendChild(section);
     });
   </script>
 </body>
