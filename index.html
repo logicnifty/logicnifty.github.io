@@ -174,7 +174,7 @@ function resetIfMorning() {
   const hrs = istTime.getHours();
   const mins = istTime.getMinutes();
 
-  if (hrs === 9 && mins === 0) {
+  if (hrs === 9 && mins === 10) {
     signals.forEach(sig => {
       db.ref(`live_signals/${sig}/timestamp`).set(null);
       updateTime(sig, null); // <-- ADD THIS LINE
