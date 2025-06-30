@@ -177,6 +177,7 @@ function resetIfMorning() {
   if (hrs === 9 && mins === 0) {
     signals.forEach(sig => {
       db.ref(`live_signals/${sig}/timestamp`).set(null);
+      updateTime(sig, null); // <-- ADD THIS LINE
     });
   }
 }
