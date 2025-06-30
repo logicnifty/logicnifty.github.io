@@ -163,17 +163,22 @@
     });
   }
 
-  // Reset at 8:00 AM IST
-  function resetIfMorning() {
-    const now = new Date();
-    const hrs = now.getHours();
-    const mins = now.getMinutes();
-    if (hrs === 8 && mins === 0) {
-      signals.forEach(sig => {
-        db.ref(`live_signals/${sig}/timestamp`).set(null);
-      });
-    }
+ // Reset at 9:00 AM IST
+function resetIfMorning() {
+  const now = new Date();
+  const istOffset = 5.5 * 60 * 60 * 1000; // IST = UTC + 5:30
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const istTime = new Date(utc + istOffset);
+
+  const hrs = istTime.getHours();
+  const mins = istTime.getMinutes();
+
+  if (hrs === 9 && mins === 0) {
+    signals.forEach(sig => {
+      db.ref(`live_signals/${sig}/timestamp`).set(null);
+    });
   }
+}
 
   function toggleMode() {
     document.body.classList.toggle("light-mode");
