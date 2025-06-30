@@ -110,6 +110,10 @@
 </head>
 <body>
 
+<!-- Unlock speech on mobile -->
+<button id="unlockAudio" onclick="unlockSpeech()" style="position:absolute; top:0; left:0; width:1px; height:1px; opacity:0;">Start</button>
+<audio id="beep" src="ding.mp3" preload="auto"></audio>
+
 <div class="theme-toggle">
   <label>🌙/☀️</label>
   <label class="switch">
@@ -154,15 +158,30 @@
 
   const signals = ["bottom_finder", "top_finder", "reversal_bull", "reversal_bear"];
   const lastTimestamps = {};
+  let speechUnlocked = false;
+
+  function unlockSpeech() {
+    if (!speechUnlocked) {
+      const dummy = new SpeechSynthesisUtterance("Voice enabled");
+      speechSynthesis.speak(dummy);
+      speechUnlocked = true;
+      document.getElementById("unlockAudio").remove();
+    }
+  }
 
   function speak(text) {
-    if ('speechSynthesis' in window) {
+    if ('speechSynthesis' in window && speechUnlocked) {
       const voices = speechSynthesis.getVoices();
       const msg = new SpeechSynthesisUtterance(text);
       msg.lang = 'en-IN';
       if (voices.length) msg.voice = voices.find(v => v.lang === 'en-IN') || voices[0];
-      speechSynthesis.cancel(); // Stop any ongoing speech
+      speechSynthesis.cancel();
       speechSynthesis.speak(msg);
+    }
+    const beep = document.getElementById("beep");
+    if (beep) {
+      beep.currentTime = 0;
+      beep.play();
     }
   }
 
