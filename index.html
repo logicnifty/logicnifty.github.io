@@ -45,7 +45,7 @@
 
     .theme-toggle {
       display: flex;
-      justify-content: flex-end;
+      justify-content: space-between;
       align-items: center;
       margin-bottom: 10px;
     }
@@ -55,7 +55,6 @@
       display: inline-block;
       width: 50px;
       height: 24px;
-      margin-left: 10px;
     }
 
     .switch input {
@@ -111,6 +110,7 @@
 <body>
 
 <div class="theme-toggle">
+  <button onclick="enableAudio()">🔊 Enable Sound</button>
   <label>🌙/☀️</label>
   <label class="switch">
     <input type="checkbox" onclick="toggleMode()">
@@ -136,7 +136,7 @@
 <a class="history-button" href="history.html">View Signal History</a>
 
 <!-- Audio Alert -->
-<audio id="alertSound" src="ding.mp3" preload="auto"></audio>
+<audio id="alertSound" src="https://www.soundjay.com/button/beep-07.wav" preload="auto"></audio>
 
 <!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -157,6 +157,11 @@
 
   const signals = ["bottom_finder", "top_finder", "reversal_bull", "reversal_bear"];
   const lastTimestamps = {};
+
+  function enableAudio() {
+    const sound = document.getElementById("alertSound");
+    sound.play().catch(err => console.log("Audio enabled"));
+  }
 
   function speak(text) {
     if ('speechSynthesis' in window) {
@@ -215,8 +220,8 @@
   }
 
   fetchSignals();
-  setInterval(fetchSignals, 10000); // every 10 seconds
-  setInterval(resetIfMorning, 60000); // check reset every minute
+  setInterval(fetchSignals, 10000);
+  setInterval(resetIfMorning, 60000);
 </script>
 </body>
 </html>
