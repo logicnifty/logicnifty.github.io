@@ -1,19 +1,38 @@
+<!-- Beep Sound -->
 <audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
+
+<!-- Demo Button -->
+<button onclick="playAlert()" style="
+  font-size: 18px;
+  padding: 10px 20px;
+  background-color: #f44336;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  margin-top: 20px;
+  cursor: pointer;
+">🔊 Play Signal</button>
+
+<!-- Script -->
 <script>
 function playAlert() {
-  // Play loud beep
+  // 🔔 Play Beep
   const beep = document.getElementById("alertSound");
-  beep.currentTime = 0;
-  beep.play().catch(() => {});
+  if (beep) {
+    beep.volume = 1.0;
+    beep.currentTime = 0;
+    beep.play().catch((err) => {
+      console.warn("Beep blocked:", err);
+    });
+  }
 
-  // Speak signal name
+  // 🗣️ Speak the signal name
   const msg = new SpeechSynthesisUtterance("Top Finder Signal Activated");
   msg.lang = "en-IN";
   msg.volume = 1;
-  msg.rate = 0.9;
+  msg.rate = 0.85;
   msg.pitch = 1;
+  speechSynthesis.cancel(); // cancel any overlapping voice
   speechSynthesis.speak(msg);
 }
 </script>
-<button onclick="playAlert()">🔊 Play Signal</button>
-
