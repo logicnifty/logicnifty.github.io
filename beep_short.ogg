@@ -3,21 +3,22 @@
 <button onclick="playAlert()" style="margin-top: 20px;">🔔 Demo Alert</button>
 
 <script>
-  function playAlert(signalName = "") {
-    const audio = document.getElementById("alertSound");
-    if (audio) {
-      audio.currentTime = 0;
-      const playPromise = audio.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(() => { /* Fail silently */ });
-      }
-    }
+  function playAlert(signalName = "New Signal") {
+    // Speak the signal name using speech synthesis
+    const msg = new SpeechSynthesisUtterance(`${signalName} activated`);
+    msg.lang = "en-IN";
+    msg.volume = 1; // max volume
+    msg.rate = 0.9; // slightly slower for clarity
+    msg.pitch = 1;
 
-    if (signalName) {
-      const utterance = new SpeechSynthesisUtterance(signalName);
-      utterance.lang = 'en-IN'; // Use Indian English if needed
-      utterance.rate = 0.95;
-      speechSynthesis.speak(utterance);
-    }
+    // Optional: Select a specific voice (e.g., Indian English)
+    const voices = speechSynthesis.getVoices();
+    msg.voice = voices.find(voice => voice.name.includes("Google") || voice.lang === "en-IN");
+
+    speechSynthesis.cancel(); // stop any current speech
+    speechSynthesis.speak(msg);
+  }
+</script>
+
   }
 </script>
