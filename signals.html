@@ -30,6 +30,7 @@
     .bear-rev { background-color: #3a1e1e; border: 2px solid #f44336; }
     .bull-break { background-color: #00333a; border: 2px solid #00bcd4; }
     .bear-break { background-color: #2a1e3a; border: 2px solid #9c27b0; }
+
     .timestamp {
       font-size: 18px;
       color: #ffeb3b;
@@ -63,19 +64,12 @@
       margin-left: 10px;
     }
 
-    .switch input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-    }
+    .switch input { opacity: 0; width: 0; height: 0; }
 
     .slider {
       position: absolute;
       cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      top: 0; left: 0; right: 0; bottom: 0;
       background-color: #ccc;
       transition: .4s;
       border-radius: 24px;
@@ -93,19 +87,10 @@
       border-radius: 50%;
     }
 
-    input:checked + .slider {
-      background-color: #2196F3;
-    }
+    input:checked + .slider { background-color: #2196F3; }
+    input:checked + .slider:before { transform: translateX(26px); }
 
-    input:checked + .slider:before {
-      transform: translateX(26px);
-    }
-
-    .light-mode {
-      background-color: #fff !important;
-      color: #000 !important;
-    }
-
+    .light-mode { background-color: #fff !important; color: #000 !important; }
     .light-mode .signal-box { color: #000; }
     .light-mode .bull-rev { background-color: #e8f5e9; border-color: #4caf50; }
     .light-mode .bear-rev { background-color: #ffebee; border-color: #f44336; }
@@ -116,6 +101,10 @@
 </head>
 <body>
 
+<!-- 🔊 Alert Sound -->
+<audio id="alertSound" src="alert.mp3" preload="auto"></audio>
+
+<!-- 🌙/☀️ Toggle -->
 <div class="theme-toggle">
   <label>🌙/☀️</label>
   <label class="switch">
@@ -126,6 +115,7 @@
 
 <h2 style="text-align:center;">LIVE Nifty Signals</h2>
 
+<!-- 📊 Signal Boxes -->
 <div id="bottom_finder" class="signal-box bull-break">
   Bottom Finder<br><span class="timestamp" id="bottom_finder_time">Waiting for signal</span>
 </div>
@@ -139,9 +129,14 @@
   Reversal Bear<br><span class="timestamp" id="reversal_bear_time">Waiting for signal</span>
 </div>
 
+<!-- 🔘 DEMO Button -->
+<button onclick="playAlert('demo_signal_test')" class="history-button" style="background-color:#2196F3;">🔔 Demo Alert</button>
+
+<!-- 📄 Navigation -->
 <a class="history-button" href="history.html">📜 View Signal History</a>
 <a class="history-button" href="index.html">🔙 Back to Home</a>
 
+<!-- 🔌 Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
@@ -161,11 +156,20 @@
   const signals = ["bottom_finder", "top_finder", "reversal_bull", "reversal_bear"];
   const lastTimestamps = {};
 
+  function playAlert(signal) {
+    const audio = document.getElementById("alertSound");
+    if (audio) {
+      audio.play().catch(e => console.log("Audio play blocked:", e));
+    }
+    alert("🔔 New Signal: " + signal.replace(/_/g, ' ').toUpperCase());
+  }
+
   function updateTime(signal, timestamp) {
     const el = document.getElementById(`${signal}_time`);
     const previous = lastTimestamps[signal];
     if (timestamp && timestamp !== previous) {
       el.innerText = timestamp;
+      playAlert(signal);
     } else if (!timestamp) {
       el.innerText = "Waiting for signal";
     }
