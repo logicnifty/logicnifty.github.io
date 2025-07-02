@@ -1,0 +1,14 @@
+<audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+
+<button onclick="playAlert()" style="margin-top: 20px;">🔔 Demo Alert</button>
+
+<script>
+  function playAlert() {
+    const audio = document.getElementById("alertSound");
+    audio.currentTime = 0;
+    audio.play().catch(e => {
+      console.error("Audio play failed:", e);
+      alert("Please tap the screen once to allow sound.");
+    });
+  }
+</script>
