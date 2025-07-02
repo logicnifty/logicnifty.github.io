@@ -12,7 +12,6 @@
       max-width: 480px;
       margin: auto;
       padding: 16px;
-      transition: background 0.3s, color 0.3s;
     }
 
     .signal-box {
@@ -78,19 +77,26 @@
     .slider:before {
       position: absolute;
       content: "";
-      height: 18px;
-      width: 18px;
-      left: 3px;
-      bottom: 3px;
+      height: 18px; width: 18px;
+      left: 3px; bottom: 3px;
       background-color: white;
       transition: .4s;
       border-radius: 50%;
     }
 
-    input:checked + .slider { background-color: #2196F3; }
-    input:checked + .slider:before { transform: translateX(26px); }
+    input:checked + .slider {
+      background-color: #2196F3;
+    }
 
-    .light-mode { background-color: #fff !important; color: #000 !important; }
+    input:checked + .slider:before {
+      transform: translateX(26px);
+    }
+
+    .light-mode {
+      background-color: #fff !important;
+      color: #000 !important;
+    }
+
     .light-mode .signal-box { color: #000; }
     .light-mode .bull-rev { background-color: #e8f5e9; border-color: #4caf50; }
     .light-mode .bear-rev { background-color: #ffebee; border-color: #f44336; }
@@ -101,10 +107,7 @@
 </head>
 <body>
 
-<!-- 🔊 Alert Sound -->
-<audio id="alertSound" src="alert.mp3" preload="auto"></audio>
-
-<!-- 🌙/☀️ Toggle -->
+<!-- Theme Toggle -->
 <div class="theme-toggle">
   <label>🌙/☀️</label>
   <label class="switch">
@@ -115,7 +118,7 @@
 
 <h2 style="text-align:center;">LIVE Nifty Signals</h2>
 
-<!-- 📊 Signal Boxes -->
+<!-- Signal Sections -->
 <div id="bottom_finder" class="signal-box bull-break">
   Bottom Finder<br><span class="timestamp" id="bottom_finder_time">Waiting for signal</span>
 </div>
@@ -129,16 +132,17 @@
   Reversal Bear<br><span class="timestamp" id="reversal_bear_time">Waiting for signal</span>
 </div>
 
-<!-- 🔘 DEMO Button -->
-<button onclick="playAlert('demo_signal_test')" class="history-button" style="background-color:#2196F3;">🔔 Demo Alert</button>
-
-<!-- 📄 Navigation -->
+<!-- Navigation -->
 <a class="history-button" href="history.html">📜 View Signal History</a>
 <a class="history-button" href="index.html">🔙 Back to Home</a>
 
-<!-- 🔌 Firebase -->
+<!-- Beep Sound (for real alerts only) -->
+<audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
+
+<!-- Firebase Scripts -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyCjL2T_j_tnV22YuftQ444inUTd0FoDC7Q",
@@ -156,20 +160,12 @@
   const signals = ["bottom_finder", "top_finder", "reversal_bull", "reversal_bear"];
   const lastTimestamps = {};
 
-  function playAlert(signal) {
-    const audio = document.getElementById("alertSound");
-    if (audio) {
-      audio.play().catch(e => console.log("Audio play blocked:", e));
-    }
-    alert("🔔 New Signal: " + signal.replace(/_/g, ' ').toUpperCase());
-  }
-
   function updateTime(signal, timestamp) {
     const el = document.getElementById(`${signal}_time`);
-    const previous = lastTimestamps[signal];
-    if (timestamp && timestamp !== previous) {
+    const prev = lastTimestamps[signal];
+    if (timestamp && timestamp !== prev) {
       el.innerText = timestamp;
-      playAlert(signal);
+      playAlert();
     } else if (!timestamp) {
       el.innerText = "Waiting for signal";
     }
@@ -200,13 +196,22 @@
     }
   }
 
+  function playAlert() {
+    const audio = document.getElementById("alertSound");
+    audio.currentTime = 0;
+    audio.play().catch(() => {
+      // No popup here — completely silent fallback
+    });
+  }
+
   function toggleMode() {
     document.body.classList.toggle("light-mode");
   }
 
   fetchSignals();
-  setInterval(fetchSignals, 10000);
-  setInterval(resetIfMorning, 60000);
+  setInterval(fetchSignals, 10000); // poll every 10 seconds
+  setInterval(resetIfMorning, 60000); // check every 1 minute
 </script>
+
 </body>
 </html>
