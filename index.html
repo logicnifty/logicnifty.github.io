@@ -12,7 +12,6 @@
       max-width: 480px;
       margin: auto;
       padding: 16px;
-      transition: background 0.3s, color 0.3s;
     }
 
     .signal-box {
@@ -108,7 +107,7 @@
 </head>
 <body>
 
-<!-- Toggle Theme -->
+<!-- Theme Toggle -->
 <div class="theme-toggle">
   <label>🌙/☀️</label>
   <label class="switch">
@@ -119,7 +118,7 @@
 
 <h2 style="text-align:center;">LIVE Nifty Signals</h2>
 
-<!-- Signal Boxes -->
+<!-- Signal Sections -->
 <div id="bottom_finder" class="signal-box bull-break">
   Bottom Finder<br><span class="timestamp" id="bottom_finder_time">Waiting for signal</span>
 </div>
@@ -133,11 +132,11 @@
   Reversal Bear<br><span class="timestamp" id="reversal_bear_time">Waiting for signal</span>
 </div>
 
-<!-- Navigation Buttons -->
+<!-- Navigation -->
 <a class="history-button" href="history.html">📜 View Signal History</a>
 <a class="history-button" href="index.html">🔙 Back to Home</a>
 
-<!-- Beep Sound -->
+<!-- Beep Sound (for real alerts only) -->
 <audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg" preload="auto"></audio>
 
 <!-- Firebase Scripts -->
@@ -155,63 +154,4 @@
     appId: "1:812760222301:web:61d73f8e9a37259abf5bb4"
   };
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  const signals = ["bottom_finder", "top_finder", "reversal_bull", "reversal_bear"];
-  const lastTimestamps = {};
-
-  function updateTime(signal, timestamp) {
-    const el = document.getElementById(`${signal}_time`);
-    const previous = lastTimestamps[signal];
-    if (timestamp && timestamp !== previous) {
-      el.innerText = timestamp;
-      playAlert();
-    } else if (!timestamp) {
-      el.innerText = "Waiting for signal";
-    }
-    lastTimestamps[signal] = timestamp;
-  }
-
-  function fetchSignals() {
-    db.ref("live_signals").once("value", snapshot => {
-      const data = snapshot.val() || {};
-      signals.forEach(signal => {
-        updateTime(signal, data[signal]?.timestamp || null);
-      });
-    });
-  }
-
-  function resetIfMorning() {
-    const now = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000;
-    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const istTime = new Date(utc + istOffset);
-    const hrs = istTime.getHours();
-    const mins = istTime.getMinutes();
-    if (hrs === 9 && mins === 10) {
-      signals.forEach(sig => {
-        db.ref(`live_signals/${sig}/timestamp`).set(null);
-        updateTime(sig, null);
-      });
-    }
-  }
-
-  function playAlert() {
-    const audio = document.getElementById("alertSound");
-    audio.currentTime = 0;
-    audio.play().catch(err => {
-      console.warn("Sound play blocked until user interacts.");
-    });
-  }
-
-  function toggleMode() {
-    document.body.classList.toggle("light-mode");
-  }
-
-  fetchSignals();
-  setInterval(fetchSignals, 10000);
-  setInterval(resetIfMorning, 60000);
-</script>
-
-</body>
-</html>
+  firebase.initializeApp(fir
