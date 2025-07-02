@@ -3,12 +3,21 @@
 <button onclick="playAlert()" style="margin-top: 20px;">🔔 Demo Alert</button>
 
 <script>
-  function playAlert() {
+  function playAlert(signalName = "") {
     const audio = document.getElementById("alertSound");
-    audio.currentTime = 0;
-    audio.play().catch(e => {
-      console.error("Audio play failed:", e);
-      alert("Please tap the screen once to allow sound.");
-    });
+    if (audio) {
+      audio.currentTime = 0;
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => { /* Fail silently */ });
+      }
+    }
+
+    if (signalName) {
+      const utterance = new SpeechSynthesisUtterance(signalName);
+      utterance.lang = 'en-IN'; // Use Indian English if needed
+      utterance.rate = 0.95;
+      speechSynthesis.speak(utterance);
+    }
   }
 </script>
