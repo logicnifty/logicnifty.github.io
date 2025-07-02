@@ -1,21 +1,9 @@
 <!-- Beep Sound -->
 <audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 
-<!-- Demo Button -->
-<button onclick="playAlert()" style="
-  font-size: 18px;
-  padding: 10px 20px;
-  background-color: #f44336;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  margin-top: 20px;
-  cursor: pointer;
-">🔊 Play Signal</button>
-
 <!-- Script -->
 <script>
-function playAlert() {
+function playAlert(signalName = "Top Finder Signal Activated") {
   // 🔔 Play Beep
   const beep = document.getElementById("alertSound");
   if (beep) {
@@ -27,12 +15,12 @@ function playAlert() {
   }
 
   // 🗣️ Speak the signal name
-  const msg = new SpeechSynthesisUtterance("Top Finder Signal Activated");
+  const msg = new SpeechSynthesisUtterance(signalName);
   msg.lang = "en-IN";
   msg.volume = 1;
   msg.rate = 0.85;
   msg.pitch = 1;
-  speechSynthesis.cancel(); // cancel any overlapping voice
+  speechSynthesis.cancel(); // stop any ongoing speech
   speechSynthesis.speak(msg);
 }
 </script>
