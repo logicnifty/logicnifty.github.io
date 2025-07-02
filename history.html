@@ -6,38 +6,31 @@
   <title>Signal History</title>
   <style>
     body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #111;
+      background: #121212;
       color: #fff;
+      font-family: 'Segoe UI', sans-serif;
       padding: 20px;
       max-width: 600px;
       margin: auto;
     }
     h2 { text-align: center; }
-    .signal-section {
-      margin-bottom: 30px;
-    }
-    ul {
-      list-style: none;
-      padding-left: 0;
-    }
+    ul { list-style: none; padding: 0; }
     li {
-      padding: 6px 0;
-      border-bottom: 1px solid #444;
+      background: #1e1e1e;
+      margin: 10px 0;
+      padding: 12px;
+      border-left: 4px solid #4caf50;
+      border-radius: 6px;
     }
-    .signal-name {
-      font-size: 20px;
-      margin-bottom: 10px;
-      color: #00e676;
-    }
+    .signal { font-weight: bold; }
+    .time { color: #ccc; font-size: 0.9em; margin-top: 4px; }
+    .back { display: block; margin-top: 20px; color: #2196f3; text-align: center; text-decoration: none; }
   </style>
 </head>
 <body>
-  <a href="index.html" style="display:block; text-align:left; margin-bottom:20px; color:#00e676; text-decoration:none;">🔙 Back to Home</a>
-  <h2>🔁 Signal History</h2>
- 
-
-  <div id="history"></div>
+  <h2>📜 Signal History</h2>
+  <ul id="historyList">Loading...</ul>
+  <a class="back" href="live.html">🔙 Back to Live</a>
 
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
@@ -55,39 +48,22 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const signalTypes = ["bottom_finder", "top_finder", "reversal_bull", "reversal_bear"];
+    db.ref("history").limitToLast(50).on("value", snapshot => {
+      const data = snapshot.val() || {};
+      const list = document.getElementById("historyList");
+      list.innerHTML = "";
 
-    const historyDiv = document.getElementById("history");
+      const entries = Object.values(data).reverse();
 
-    signalTypes.forEach(signal => {
-      const section = document.createElement("div");
-      section.className = "signal-section";
+      for (const item of entries) {
+        const li = document.createElement("li");
+        li.innerHTML = `<div class="signal">${item.signal}</div><div class="time">${item.timestamp}</div>`;
+        list.appendChild(li);
+      }
 
-      const heading = document.createElement("div");
-      heading.className = "signal-name";
-      heading.innerText = signal.replace("_", " ").toUpperCase();
-      section.appendChild(heading);
-
-      const ul = document.createElement("ul");
-
-      db.ref(`signal_history/${signal}`).once("value", snapshot => {
-        const data = snapshot.val();
-        if (data) {
-          const timestamps = Object.values(data).reverse();
-          timestamps.forEach(ts => {
-            const li = document.createElement("li");
-            li.innerText = ts;
-            ul.appendChild(li);
-          });
-        } else {
-          const li = document.createElement("li");
-          li.innerText = "No history yet.";
-          ul.appendChild(li);
-        }
-      });
-
-      section.appendChild(ul);
-      historyDiv.appendChild(section);
+      if (entries.length === 0) {
+        list.innerHTML = "<li>No signal history available yet.</li>";
+      }
     });
   </script>
 </body>
