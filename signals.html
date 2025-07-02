@@ -30,6 +30,7 @@
     .bear-rev { background-color: #3a1e1e; border: 2px solid #f44336; }
     .bull-break { background-color: #00333a; border: 2px solid #00bcd4; }
     .bear-break { background-color: #2a1e3a; border: 2px solid #9c27b0; }
+
     .timestamp {
       font-size: 18px;
       color: #ffeb3b;
@@ -127,115 +128,4 @@
 <h2 style="text-align:center;">LIVE Nifty Signals</h2>
 
 <div id="bottom_finder" class="signal-box bull-break">
-  Bottom Finder<br><span class="timestamp" id="bottom_finder_time">Waiting for signal</span>
-</div>
-<div id="top_finder" class="signal-box bear-break">
-  Top Finder<br><span class="timestamp" id="top_finder_time">Waiting for signal</span>
-</div>
-<div id="reversal_bull" class="signal-box bull-rev">
-  Reversal Bull<br><span class="timestamp" id="reversal_bull_time">Waiting for signal</span>
-</div>
-<div id="reversal_bear" class="signal-box bear-rev">
-  Reversal Bear<br><span class="timestamp" id="reversal_bear_time">Waiting for signal</span>
-</div>
-
-<a class="history-button" href="history.html">📜 View Signal History</a>
-<a class="history-button" href="index.html">🔙 Back to Home</a>
-
-<!-- 🔊 LOUD ALERT SOUND -->
-<audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
-
-<!-- 🟧 DEMO ALERT BUTTON -->
-<div style="margin-top: 20px; text-align: center;">
-  <button onclick="playAlert()" style="
-    font-size: 18px;
-    padding: 10px 20px;
-    background: #f44336;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-  ">🔊 Play Demo Alert</button>
-</div>
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCjL2T_j_tnV22YuftQ444inUTd0FoDC7Q",
-    authDomain: "logicnifty-live.firebaseapp.com",
-    databaseURL: "https://logicnifty-live-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "logicnifty-live",
-    storageBucket: "logicnifty-live.appspot.com",
-    messagingSenderId: "812760222301",
-    appId: "1:812760222301:web:61d73f8e9a37259abf5bb4"
-  };
-
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.database();
-  const signals = ["bottom_finder", "top_finder", "reversal_bull", "reversal_bear"];
-  const lastTimestamps = {};
-
-  function updateTime(signal, timestamp) {
-    const el = document.getElementById(`${signal}_time`);
-    const previous = lastTimestamps[signal];
-    if (timestamp && timestamp !== previous) {
-      el.innerText = timestamp;
-      // Play alert only if new signal comes
-      playAlert(signal.replaceAll("_", " "));
-    } else if (!timestamp) {
-      el.innerText = "Waiting for signal";
-    }
-    lastTimestamps[signal] = timestamp;
-  }
-
-  function fetchSignals() {
-    db.ref("live_signals").once("value", snapshot => {
-      const data = snapshot.val() || {};
-      signals.forEach(signal => {
-        updateTime(signal, data[signal]?.timestamp || null);
-      });
-    });
-  }
-
-  function resetIfMorning() {
-    const now = new Date();
-    const istOffset = 5.5 * 60 * 60 * 1000;
-    const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
-    const istTime = new Date(utc + istOffset);
-    const hrs = istTime.getHours();
-    const mins = istTime.getMinutes();
-    if (hrs === 9 && mins === 10) {
-      signals.forEach(sig => {
-        db.ref(`live_signals/${sig}/timestamp`).set(null);
-        updateTime(sig, null);
-      });
-    }
-  }
-
-  function toggleMode() {
-    document.body.classList.toggle("light-mode");
-  }
-
-  // 🗣️ SPEAK + 🔔 SOUND ALERT
-  function playAlert(signalName = "Demo Signal") {
-    const beep = document.getElementById("alertSound");
-    beep.currentTime = 0;
-    beep.play().catch(() => {});
-
-    const msg = new SpeechSynthesisUtterance(`${signalName} Activated`);
-    msg.lang = "en-IN";
-    msg.volume = 1;
-    msg.rate = 0.9;
-    msg.pitch = 1;
-    speechSynthesis.speak(msg);
-  }
-
-  fetchSignals();
-  setInterval(fetchSignals, 10000);  // every 10 seconds
-  setInterval(resetIfMorning, 60000);  // every 1 min
-</script>
-
-</body>
-</html>
+  Bottom Finder<br><sp
