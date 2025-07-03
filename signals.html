@@ -120,8 +120,12 @@
     }
 
     function updateTime(signal, timestamp) {
-      if (!timestamp || lastTimestamps[signal] === timestamp) return;
-      if (!isToday(timestamp)) return;
+      if (!timestamp || !isToday(timestamp)) return;
+
+      const currentTime = new Date(timestamp);
+      const lastTime = new Date(lastTimestamps[signal] || 0);
+
+      if (currentTime <= lastTime) return; // Only allow newer signals
 
       lastTimestamps[signal] = timestamp;
 
@@ -134,7 +138,6 @@
     function fetchSignals() {
       db.ref("live_signals").on("value", snapshot => {
         const data = snapshot.val() || {};
-        document.getElementById("signalsContainer").innerHTML = ""; // Clear previous
         signals.forEach(signal => {
           const timestamp = data[signal]?.timestamp || null;
           updateTime(signal, timestamp);
