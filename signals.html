@@ -11,30 +11,31 @@
       font-family: Arial, sans-serif;
       padding: 20px;
     }
+
     h2 {
       text-align: center;
     }
+
     .signalBox {
-      margin: 15px auto;
+      margin: 10px auto;
       padding: 15px;
       background-color: #1f1f1f;
       border: 2px solid #4caf50;
       border-radius: 8px;
-      font-size: 1.1em;
-      width: 90%;
-      max-width: 500px;
-      display: none;
+      font-size: 1.2em;
+      width: 60%;
     }
-    .signalBoxes {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+
+    #signalsContainer {
+      margin-top: 20px;
     }
-    .back-button {
+
+    .back-btn {
       text-align: center;
       margin-top: 30px;
     }
-    .back-button a {
+
+    .back-btn a {
       text-decoration: none;
       padding: 10px 20px;
       background: #4caf50;
@@ -46,13 +47,7 @@
 </head>
 <body>
   <h2>🔴 Nifty Signals</h2>
-
-  <div class="signalBoxes">
-    <div class="signalBox" id="top_finder_box"></div>
-    <div class="signalBox" id="bottom_finder_box"></div>
-    <div class="signalBox" id="trend_up_box"></div>
-    <div class="signalBox" id="trend_down_box"></div>
-  </div>
+  <div id="signalsContainer"></div>
 
   <audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 
@@ -75,13 +70,18 @@
     const lastTimestamps = {};
     const loggedSet = new Set();
 
-    const signals = ["top_finder", "bottom_finder", "trend_up", "trend_down"];
+    const signals = [
+      "top_finder",
+      "bottom_finder",
+      "trend_up",
+      "trend_down"
+    ];
 
     function playAlert(signalName) {
       const beep = document.getElementById("alertSound");
       beep.currentTime = 0;
       beep.play().catch(() => {});
-
+      
       const msg = new SpeechSynthesisUtterance(`${signalName} Signal Activated`);
       msg.lang = "en-IN";
       msg.volume = 1;
@@ -91,12 +91,10 @@
     }
 
     function showSignal(signalName, timestamp) {
-      const boxId = signalName.replaceAll(" ", "_").toLowerCase() + "_box";
-      const box = document.getElementById(boxId);
-      if (!box) return;
-
-      box.style.display = "block";
+      const box = document.createElement("div");
+      box.className = "signalBox";
       box.innerHTML = `<b>${signalName.toUpperCase()}</b><br><small>${timestamp}</small>`;
+      document.getElementById("signalsContainer").appendChild(box);
     }
 
     function pushToHistory(signalKey, timestamp) {
@@ -111,8 +109,20 @@
       });
     }
 
+    function isToday(ts) {
+      const signalDate = new Date(ts);
+      const now = new Date();
+      return (
+        signalDate.getFullYear() === now.getFullYear() &&
+        signalDate.getMonth() === now.getMonth() &&
+        signalDate.getDate() === now.getDate()
+      );
+    }
+
     function updateTime(signal, timestamp) {
       if (!timestamp || lastTimestamps[signal] === timestamp) return;
+      if (!isToday(timestamp)) return;
+
       lastTimestamps[signal] = timestamp;
 
       const signalName = signal.replaceAll("_", " ");
@@ -124,6 +134,7 @@
     function fetchSignals() {
       db.ref("live_signals").on("value", snapshot => {
         const data = snapshot.val() || {};
+        document.getElementById("signalsContainer").innerHTML = ""; // Clear previous
         signals.forEach(signal => {
           const timestamp = data[signal]?.timestamp || null;
           updateTime(signal, timestamp);
@@ -134,7 +145,7 @@
     fetchSignals();
   </script>
 
-  <div class="back-button">
+  <div class="back-btn">
     <a href="index.html">🏠 Back to Home</a>
   </div>
 </body>
