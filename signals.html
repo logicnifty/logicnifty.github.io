@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nifty Signal </title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Nifty Signals</title>
   <style>
     body {
       background: #121212;
@@ -14,20 +14,45 @@
     h2 {
       text-align: center;
     }
-    #signalBox {
-      margin-top: 20px;
+    .signalBox {
+      margin: 15px auto;
       padding: 15px;
       background-color: #1f1f1f;
       border: 2px solid #4caf50;
       border-radius: 8px;
-      font-size: 1.2em;
+      font-size: 1.1em;
+      width: 90%;
+      max-width: 500px;
       display: none;
+    }
+    .signalBoxes {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .back-button {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .back-button a {
+      text-decoration: none;
+      padding: 10px 20px;
+      background: #4caf50;
+      color: white;
+      border-radius: 8px;
+      display: inline-block;
     }
   </style>
 </head>
 <body>
   <h2>🔴 Nifty Signals</h2>
-  <div id="signalBox"></div>
+
+  <div class="signalBoxes">
+    <div class="signalBox" id="top_finder_box"></div>
+    <div class="signalBox" id="bottom_finder_box"></div>
+    <div class="signalBox" id="trend_up_box"></div>
+    <div class="signalBox" id="trend_down_box"></div>
+  </div>
 
   <audio id="alertSound" src="https://actions.google.com/sounds/v1/alarms/alarm_clock.ogg" preload="auto"></audio>
 
@@ -50,12 +75,7 @@
     const lastTimestamps = {};
     const loggedSet = new Set();
 
-    const signals = [
-      "top_finder",
-      "bottom_finder",
-      "trend_up",
-      "trend_down"
-    ];
+    const signals = ["top_finder", "bottom_finder", "trend_up", "trend_down"];
 
     function playAlert(signalName) {
       const beep = document.getElementById("alertSound");
@@ -71,9 +91,12 @@
     }
 
     function showSignal(signalName, timestamp) {
-      const box = document.getElementById("signalBox");
+      const boxId = signalName.replaceAll(" ", "_").toLowerCase() + "_box";
+      const box = document.getElementById(boxId);
+      if (!box) return;
+
       box.style.display = "block";
-      box.innerHTML = `<b>${signalName.replaceAll("_", " ").toUpperCase()}</b><br><small>${timestamp}</small>`;
+      box.innerHTML = `<b>${signalName.toUpperCase()}</b><br><small>${timestamp}</small>`;
     }
 
     function pushToHistory(signalKey, timestamp) {
@@ -111,12 +134,8 @@
     fetchSignals();
   </script>
 
-  <!-- 🏠 Back to Home button -->
-  <div style="text-align:center; margin-top: 30px;">
-    <a href="index.html" style="text-decoration:none; padding:10px 20px; background:#4caf50; color:white; border-radius:8px; display:inline-block;">
-      🏠 Back to Home
-    </a>
+  <div class="back-button">
+    <a href="index.html">🏠 Back to Home</a>
   </div>
-
 </body>
 </html>
