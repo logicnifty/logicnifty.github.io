@@ -62,20 +62,28 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    db.ref("history").limitToLast(50).on("value", snapshot => {
+    db.ref("history").limitToLast(100).on("value", snapshot => {
       const data = snapshot.val() || {};
       const list = document.getElementById("historyList");
       list.innerHTML = "";
 
       const entries = Object.values(data).reverse();
 
+      const shownSet = new Set(); // Track unique signal+timestamp
       for (const item of entries) {
+        const key = `${item.signal}_${item.timestamp}`;
+        if (shownSet.has(key)) continue;
+        shownSet.add(key);
+
         const li = document.createElement("li");
-        li.innerHTML = `<div class="signal">${item.signal}</div><div class="time">${item.timestamp}</div>`;
+        li.innerHTML = `
+          <div class="signal">${item.signal}</div>
+          <div class="time">${item.timestamp}</div>
+        `;
         list.appendChild(li);
       }
 
-      if (entries.length === 0) {
+      if (shownSet.size === 0) {
         list.innerHTML = "<li>No signal history available yet.</li>";
       }
     });
